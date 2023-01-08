@@ -1,0 +1,17 @@
+title New note in Single page app diagram
+
+
+note over browser:
+user creates a note by writing into form input field and clicks submit.
+on page javascript handles the submit event and adds the new note to existing notes list and renders it to display,
+then sends new note to server via POST request
+end note
+
+browser->server: HTTP POST https://studies.cs.helsinki.fi/exampleapp/new_note_spa
+
+note over server:
+server receives the data and adds new note to notes array and  
+responds with status code 201 and message 'note created'.
+end note
+
+server-->browser: HTTP status code 201 Created, {message: 'note created'}
