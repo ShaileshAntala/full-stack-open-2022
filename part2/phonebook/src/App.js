@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import phonebookService from "./Services/phonebookService";
 import Filter from "./Components/Filter";
 import PersonForm from "./Components/PersonForm";
 import Persons from "./Components/Persons";
-
-const BASE_URL = process.env.REACT_APP_BASE_API_URL;
+import axios from "axios";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
@@ -13,10 +12,10 @@ const App = () => {
   const [filter, setFilter] = useState("");
 
   useEffect(() => {
-    axios
-      .get(`${BASE_URL}/persons`)
-      .then((response) => setPersons(response.data));
-  },[]);
+    phonebookService
+      .getAllContacts()
+      .then((initialPersons) => setPersons(initialPersons));
+  }, []);
 
   const showAll = filter ? false : true;
 
@@ -38,21 +37,30 @@ const App = () => {
   };
 
   const isDuplicateContact = (newPerson) => {
-    const isNameDuplicate = persons.some(
+    const isNameDuplicate = persons.find(
       (person) =>
         person.name.toLocaleLowerCase() === newPerson.name.toLocaleLowerCase()
     );
-    const isNumberDuplicate = persons.some(
-      (person) => person.number === newPerson.number
-    );
-    if (isNameDuplicate && isNumberDuplicate) {
-      return `${newPerson.name} ${newPerson.number} already exists in phonebook`;
-    } else if (isNameDuplicate) {
-      return `${newPerson.name} already exists in phonebook`;
-    } else if (isNumberDuplicate) {
-      return `${newPerson.number} already exists in phonebook`;
+
+    return isNameDuplicate;
+  };
+
+  const updatePerson = (existingPerson) => {
+    const text = `${existingPerson.name} is already added to phonebook, replace the old number with a new one`;
+    const updatedPerson = { ...existingPerson, number: newNumber };
+    if (window.confirm(text)) {
+      phonebookService
+        .updateContact(existingPerson.id, updatedPerson)
+        .then((response) =>
+          setPersons(
+            persons.map((person) =>
+              person.id !== existingPerson.id ? person : response
+            )
+          )
+        );
+      setNewName("");
+      setNewNumber("");
     }
-    return false;
   };
 
   const addPhone = (e) => {
@@ -60,11 +68,23 @@ const App = () => {
     const newPerson = { name: newName, number: newNumber };
     const isExists = isDuplicateContact(newPerson);
     if (isExists) {
-      alert(isExists);
+      updatePerson(isExists);
     } else {
-      setPersons(persons.concat(newPerson));
+      phonebookService
+        .addContact(newPerson)
+        .then((response) => setPersons(persons.concat(response)));
       setNewName("");
       setNewNumber("");
+    }
+  };
+
+  const deletePhone = (id, name) => {
+    const text = `Delete ${name}`;
+    if (window.confirm(text)) {
+      phonebookService
+        .deleteContact(id)
+        .then(() => setPersons(persons.filter((person) => person.id !== id)))
+        .catch(() => alert(`${name}' was already deleted from server`));
     }
   };
 
@@ -80,7 +100,7 @@ const App = () => {
         onSubmit={addPhone}
       />
       <h2>Numbers</h2>
-      <Persons namesToShow={namesToShow} />
+      <Persons namesToShow={namesToShow} deletePhone={deletePhone} />
     </div>
   );
 };
