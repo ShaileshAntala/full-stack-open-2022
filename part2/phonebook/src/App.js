@@ -3,13 +3,14 @@ import phonebookService from "./Services/phonebookService";
 import Filter from "./Components/Filter";
 import PersonForm from "./Components/PersonForm";
 import Persons from "./Components/Persons";
-import axios from "axios";
+import Notification from "./Components/Notification";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
+  const [message, setMessage] = useState(null);
 
   useEffect(() => {
     phonebookService
@@ -24,6 +25,16 @@ const App = () => {
     : persons.filter((person) =>
         person.name.toLowerCase().includes(filter.toLowerCase())
       );
+
+  const setNotificationData = (type, description) => {
+    setMessage({
+      type,
+      description,
+    });
+    setTimeout(() => {
+      setMessage(null);
+    }, 3000);
+  };
 
   const handleChange = (e) => {
     const name = e.target.name;
@@ -41,7 +52,6 @@ const App = () => {
       (person) =>
         person.name.toLocaleLowerCase() === newPerson.name.toLocaleLowerCase()
     );
-
     return isNameDuplicate;
   };
 
@@ -51,16 +61,25 @@ const App = () => {
     if (window.confirm(text)) {
       phonebookService
         .updateContact(existingPerson.id, updatedPerson)
-        .then((response) =>
+        .then((response) => {
           setPersons(
             persons.map((person) =>
               person.id !== existingPerson.id ? person : response
             )
+          );
+          setNotificationData("success", `Updated ${response.name}`);
+          setNewName("");
+          setNewNumber("");
+        })
+        .catch(() =>
+          setNotificationData(
+            "error",
+            `Information of ${existingPerson.name}' has already been removed from server`
           )
         );
-      setNewName("");
-      setNewNumber("");
     }
+    setNewName("");
+    setNewNumber("");
   };
 
   const addPhone = (e) => {
@@ -72,9 +91,18 @@ const App = () => {
     } else {
       phonebookService
         .addContact(newPerson)
-        .then((response) => setPersons(persons.concat(response)));
-      setNewName("");
-      setNewNumber("");
+        .then((response) => {
+          setPersons(persons.concat(response));
+          setNotificationData("success", `Added ${response.name}`);
+          setNewName("");
+          setNewNumber("");
+        })
+        .catch(() =>
+          setNotificationData(
+            "error",
+            `Problem adding ${newName}, please try again`
+          )
+        );
     }
   };
 
@@ -83,14 +111,26 @@ const App = () => {
     if (window.confirm(text)) {
       phonebookService
         .deleteContact(id)
-        .then(() => setPersons(persons.filter((person) => person.id !== id)))
-        .catch(() => alert(`${name}' was already deleted from server`));
+        .then(() => {
+          setPersons(persons.filter((person) => person.id !== id));
+          setNotificationData(
+            "success",
+            `${name}' has been removed from server`
+          );
+        })
+        .catch(() =>
+          setNotificationData(
+            "error",
+            `Information of ${name}' has already been removed from server`
+          )
+        );
     }
   };
 
   return (
     <div>
       <h2>Phonebook</h2>
+      {message && <Notification message={message} />}
       <Filter value={filter} handleChange={handleChange} />
       <h1>add a new</h1>
       <PersonForm
