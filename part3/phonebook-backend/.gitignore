@@ -7,7 +7,6 @@
 /coverage
 
 # production
-/build
 .dockerignore
 fly.toml
 Dockerfile

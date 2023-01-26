@@ -71,15 +71,13 @@ const App = () => {
           setNewName("");
           setNewNumber("");
         })
-        .catch(() =>
+        .catch((error) =>
           setNotificationData(
             "error",
-            `Information of ${existingPerson.name}' has already been removed from server`
+            error.response.data.error || error.message
           )
         );
     }
-    setNewName("");
-    setNewNumber("");
   };
 
   const addPhone = (e) => {
@@ -97,12 +95,12 @@ const App = () => {
           setNewName("");
           setNewNumber("");
         })
-        .catch(() =>
+        .catch((error) => {
           setNotificationData(
             "error",
-            `Problem adding ${newName}, please try again`
-          )
-        );
+            error.response.data.error || error.message
+          );
+        });
     }
   };
 
