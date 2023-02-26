@@ -6,7 +6,7 @@ if (process.argv.length < 2) {
   process.exit(1)
 }
 
-const url = 'mongodb+srv://Shailesh_Antala:Mukti199395@phonebook.id6ybht.mongodb.net/testBlogList?retryWrites=true&w=majority'
+const url = process.env.TEST_MONGODB_URI
 
 mongoose.set('strictQuery', false)
 mongoose.connect(url)
