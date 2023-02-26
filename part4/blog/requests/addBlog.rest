@@ -1,0 +1,10 @@
+POST http://localhost:3001/api/blogs
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InJvb3QiLCJpZCI6IjYzZmI0MjM2MjAxYzNkYWRkOWYxMTgzZCIsImlhdCI6MTY3NzQyMTYwMiwiZXhwIjoxNjc3NDI1MjAyfQ.ViwqRwwNTnpmjm1EhOxS-2qF3F0ev8Ds8EkzKgvaK-w
+
+{
+  "title" : "My Authenticated5 Blog",
+  "author" : "root",
+  "url" : "https://www.quora.com",
+  "likes": 105
+}

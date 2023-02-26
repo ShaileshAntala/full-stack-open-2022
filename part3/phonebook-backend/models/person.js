@@ -1,14 +1,5 @@
 const mongoose = require('mongoose')
 
-// eslint-disable-next-line no-undef
-const url = process.env.MONGODB_URI
-
-mongoose.set('strictQuery', false)
-mongoose
-  .connect(url)
-  .then(() => console.log('connected to MongoDB'))
-  .catch((error) => console.log('error connecting to MongoDG:', error.message))
-
 const personSchema = new mongoose.Schema({
   name: { type: String, minLength: 3, required: true },
   number: {
